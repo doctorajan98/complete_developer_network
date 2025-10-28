@@ -1,4 +1,4 @@
-using CDN.Core.Application.DTOs;
+using CDN.Core.Application.DTO;
 using CDN.Core.Application.Interfaces;
 using CDN.Core.Domain.Entities;
 using CDN.Core.Domain.Interfaces;
@@ -17,13 +17,13 @@ namespace CDN.Core.Application.Services
         public async Task<FreelancerResponseDto?> GetByIdAsync(int userId)
         {
             var freelancer = await _freelancerRepository.GetByIdAsync(userId);
-            return freelancer != null ? MaptoResponseDto(freelancer) : null;
+            return freelancer != null ? MapToResponseDto(freelancer) : null;
         }
 
         public async Task<IEnumerable<FreelancerResponseDto>> GetAllAsync()
         {
             var freelancers = await _freelancerRepository.GetAllAsync();
-            return freelancers.Select(MaptoResponseDto);
+            return freelancers.Select(MapToResponseDto);
         }
 
         public async Task<IEnumerable<FreelancerResponseDto>> SearchAsync(string searchQuery)
@@ -49,9 +49,9 @@ namespace CDN.Core.Application.Services
                 PhoneNumber = createDto.PhoneNumber,
                 SkillSet = createDto.SkillSet,
                 Hobbies = createDto.Hobbies
-            }
+            };
             var createdFreelancer = await _freelancerRepository.CreateAsync(freelancer);
-            return MaptoResponseDto(createdFreelancer);
+            return MapToResponseDto(createdFreelancer);
         }
 
         public async Task<FreelancerResponseDto?> UpdateAsync(UpdateFreelancerDto updateDto)
