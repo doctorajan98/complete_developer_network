@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.OpenApi.Models;
 using CDN.Core.Application.Interfaces;
 using CDN.Core.Application.Services;
