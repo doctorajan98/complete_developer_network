@@ -402,6 +402,45 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+# Database files and migrations (if using local SQLite or similar)
+*.db
+*.sqlite
+*.sqlite3
+
+# Entity Framework migrations (uncomment if you want to ignore migration files)
+# Migrations/
+
+# User secrets and sensitive configuration
+secrets.json
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+# IDE specific files
+.vs/
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Log files
+*.log
+logs/
+
 ### DotnetCore ###
 # .NET Core build folders
 bin/
