@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace CDN.Core.Application.DTOs
+namespace CDN.Core.Application.DTO
 {
     public class CreateFreelancerDto
     {
@@ -39,7 +39,7 @@ namespace CDN.Core.Application.DTOs
         public List<string> Hobbies { get; set; } = new();
     }
 
-    public class freelancerresponseDto
+    public class FreelancerResponseDto
     {
         public int UserId { get; set; }
         public string UserName { get; set; } = string.Empty;

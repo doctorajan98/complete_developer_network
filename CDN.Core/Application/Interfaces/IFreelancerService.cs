@@ -1,4 +1,4 @@
-using CDN.Core.Application.DTOs;
+using CDN.Core.Application.DTO;
 
 namespace CDN.Core.Application.Interfaces
 {
