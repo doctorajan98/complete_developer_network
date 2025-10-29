@@ -21,5 +21,9 @@ namespace CDN.Core.Domain.Entities
         public List<string> SkillSet { get; set; } = new();
 
         public List<string> Hobbies { get; set; } = new();
+
+        public bool IsArchived { get; set; } = false;
+
+        public DateTime? ArchivedAt { get; set; }
     }
 }

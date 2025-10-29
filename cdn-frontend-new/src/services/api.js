@@ -54,6 +54,30 @@ export const freelancerAPI = {
     const response = await api.get(`/Search?searchQuery=${encodeURIComponent(searchQuery)}`);
     return response.data;
   },
+
+  // Get all freelancers including archived
+  getAllFreelancersIncludingArchived: async () => {
+    const response = await api.get('/ListAllIncludingArchived');
+    return response.data;
+  },
+
+  // Archive freelancer
+  archiveFreelancer: async (userId) => {
+    const response = await api.post(`/Archive?userId=${userId}`);
+    return response.data;
+  },
+
+  // Unarchive freelancer
+  unarchiveFreelancer: async (userId) => {
+    const response = await api.post(`/Unarchive?userId=${userId}`);
+    return response.data;
+  },
+
+  // Toggle archive status
+  toggleArchiveStatus: async (userId) => {
+    const response = await api.post(`/ToggleArchiveStatus?userId=${userId}`);
+    return response.data;
+  },
 };
 
 export default api;

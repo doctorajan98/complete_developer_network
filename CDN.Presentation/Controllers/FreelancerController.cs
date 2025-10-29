@@ -69,6 +69,13 @@ namespace CDN.Presentation.Controllers
             return Ok(result);
         }
 
+        [HttpGet("ListAllIncludingArchived")]
+        public async Task<ActionResult<IEnumerable<FreelancerResponseDto>>> ListAllIncludingArchived()
+        {
+            var result = await _freelancerService.GetAllIncludingArchivedAsync();
+            return Ok(result);
+        }
+
         [HttpGet("Search")]
         public async Task<ActionResult<IEnumerable<FreelancerResponseDto>>> Search(string searchQuery)
         {
@@ -79,6 +86,39 @@ namespace CDN.Presentation.Controllers
 
             var results = await _freelancerService.SearchAsync(searchQuery);
             return Ok(results);
+        }
+
+        [HttpPost("Archive")]
+        public async Task<ActionResult> Archive(int userId)
+        {
+            var result = await _freelancerService.ArchiveAsync(userId);
+            if (!result)
+            {
+                return NotFound();
+            }
+            return Ok(new { message = "Freelancer archived successfully" });
+        }
+
+        [HttpPost("Unarchive")]
+        public async Task<ActionResult> Unarchive(int userId)
+        {
+            var result = await _freelancerService.UnarchiveAsync(userId);
+            if (!result)
+            {
+                return NotFound();
+            }
+            return Ok(new { message = "Freelancer unarchived successfully" });
+        }
+
+        [HttpPost("ToggleArchiveStatus")]
+        public async Task<ActionResult> ToggleArchiveStatus(int userId)
+        {
+            var result = await _freelancerService.ToggleArchiveStatusAsync(userId);
+            if (!result)
+            {
+                return NotFound();
+            }
+            return Ok(new { message = "Freelancer archive status toggled successfully" });
         }
     }
 }

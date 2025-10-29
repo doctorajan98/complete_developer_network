@@ -26,6 +26,12 @@ namespace CDN.Core.Application.Services
             return freelancers.Select(MapToResponseDto);
         }
 
+        public async Task<IEnumerable<FreelancerResponseDto>> GetAllIncludingArchivedAsync()
+        {
+            var freelancers = await _freelancerRepository.GetAllIncludingArchivedAsync();
+            return freelancers.Select(MapToResponseDto);
+        }
+
         public async Task<IEnumerable<FreelancerResponseDto>> SearchAsync(string searchQuery)
         {
             var freelancers = await _freelancerRepository.SearchAsync(searchQuery);
@@ -78,6 +84,21 @@ namespace CDN.Core.Application.Services
             return await _freelancerRepository.DeleteAsync(userId);
         }
 
+        public async Task<bool> ArchiveAsync(int userId)
+        {
+            return await _freelancerRepository.ArchiveAsync(userId);
+        }
+
+        public async Task<bool> UnarchiveAsync(int userId)
+        {
+            return await _freelancerRepository.UnarchiveAsync(userId);
+        }
+
+        public async Task<bool> ToggleArchiveStatusAsync(int userId)
+        {
+            return await _freelancerRepository.ToggleArchiveStatusAsync(userId);
+        }
+
         private static FreelancerResponseDto MapToResponseDto(Freelancer freelancer)
         {
             return new FreelancerResponseDto
@@ -88,7 +109,9 @@ namespace CDN.Core.Application.Services
                 PhoneNumber = freelancer.PhoneNumber,
                 Email = freelancer.Email,
                 SkillSet = freelancer.SkillSet,
-                Hobbies = freelancer.Hobbies
+                Hobbies = freelancer.Hobbies,
+                IsArchived = freelancer.IsArchived,
+                ArchivedAt = freelancer.ArchivedAt
             };
         }
     }

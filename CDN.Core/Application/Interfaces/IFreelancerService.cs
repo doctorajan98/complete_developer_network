@@ -6,9 +6,13 @@ namespace CDN.Core.Application.Interfaces
     {
         Task<FreelancerResponseDto?> GetByIdAsync(int userId);
         Task<IEnumerable<FreelancerResponseDto>> GetAllAsync();
+        Task<IEnumerable<FreelancerResponseDto>> GetAllIncludingArchivedAsync();
         Task<IEnumerable<FreelancerResponseDto>> SearchAsync(string searchQuery);
         Task<FreelancerResponseDto> CreateAsync(CreateFreelancerDto createDto);
         Task<FreelancerResponseDto?> UpdateAsync(UpdateFreelancerDto updateDto);
         Task<bool> DeleteAsync(int userId);
+        Task<bool> ArchiveAsync(int userId);
+        Task<bool> UnarchiveAsync(int userId);
+        Task<bool> ToggleArchiveStatusAsync(int userId);
     }
 }

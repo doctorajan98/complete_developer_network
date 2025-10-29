@@ -29,6 +29,10 @@ import {
   Phone as PhoneIcon,
   Code as CodeIcon,
   Sports as SportsIcon,
+  Archive as ArchiveIcon,
+  Unarchive as UnarchiveIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
 } from '@mui/icons-material';
 import { freelancerAPI } from '../services/api';
 
@@ -41,18 +45,23 @@ const FreelancerList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false);
+  const [freelancerToArchive, setFreelancerToArchive] = useState(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchFreelancers();
-  }, []);
+  }, [showArchived]);
 
   const fetchFreelancers = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await freelancerAPI.getAllFreelancers();
+      const data = showArchived
+        ? await freelancerAPI.getAllFreelancersIncludingArchived()
+        : await freelancerAPI.getAllFreelancers();
       setFreelancers(data);
     } catch (err) {
       setError('Failed to fetch freelancers. Please try again.');
@@ -103,6 +112,32 @@ const FreelancerList = () => {
     setFreelancerToDelete(null);
   };
 
+  const handleArchiveClick = (freelancer) => {
+    setFreelancerToArchive(freelancer);
+    setArchiveDialogOpen(true);
+  };
+
+  const handleArchiveConfirm = async () => {
+    try {
+      if (freelancerToArchive.isArchived) {
+        await freelancerAPI.unarchiveFreelancer(freelancerToArchive.userId);
+      } else {
+        await freelancerAPI.archiveFreelancer(freelancerToArchive.userId);
+      }
+      await fetchFreelancers();
+      setArchiveDialogOpen(false);
+      setFreelancerToArchive(null);
+    } catch (err) {
+      setError('Failed to update archive status. Please try again.');
+      console.error('Error updating archive status:', err);
+    }
+  };
+
+  const handleArchiveCancel = () => {
+    setArchiveDialogOpen(false);
+    setFreelancerToArchive(null);
+  };
+
   const displayData = searchQuery.trim() ? searchResults : freelancers;
 
   if (loading) {
@@ -119,11 +154,22 @@ const FreelancerList = () => {
         <Typography variant="h4" component="h1">
           Freelancers Directory
         </Typography>
-        <Tooltip title="Add New Freelancer">
-          <Fab color="primary" aria-label="add" onClick={() => navigate('/add')}>
-            <AddIcon />
-          </Fab>
-        </Tooltip>
+        <Box display="flex" gap={2} alignItems="center">
+          <Tooltip title={showArchived ? "Hide Archived" : "Show Archived"}>
+            <Button
+              variant="outlined"
+              startIcon={showArchived ? <VisibilityOffIcon /> : <VisibilityIcon />}
+              onClick={() => setShowArchived(!showArchived)}
+            >
+              {showArchived ? "Hide Archived" : "Show Archived"}
+            </Button>
+          </Tooltip>
+          <Tooltip title="Add New Freelancer">
+            <Fab color="primary" aria-label="add" onClick={() => navigate('/add')}>
+              <AddIcon />
+            </Fab>
+          </Tooltip>
+        </Box>
       </Box>
 
       {error && (
@@ -137,9 +183,14 @@ const FreelancerList = () => {
         <TextField
           fullWidth
           variant="outlined"
-          placeholder="Search freelancers by name, skills, or email..."
+          placeholder="Search freelancers by name, username, or email..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter') {
+              handleSearch();
+            }
+          }}
           InputProps={{
             endAdornment: (
               <IconButton onClick={handleSearch} disabled={isSearching}>
@@ -173,17 +224,45 @@ const FreelancerList = () => {
         ) : (
           displayData.map((freelancer) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={freelancer.userId}>
-              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  opacity: freelancer.isArchived ? 0.7 : 1,
+                  border: freelancer.isArchived ? '2px dashed #999' : 'none'
+                }}
+              >
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-                    <Typography variant="h6" component="h2">
-                      {freelancer.name || freelancer.userName}
-                    </Typography>
                     <Box>
+                      <Typography variant="h6" component="h2">
+                        {freelancer.name || freelancer.userName}
+                      </Typography>
+                      {freelancer.isArchived && (
+                        <Chip
+                          label="ARCHIVED"
+                          size="small"
+                          color="warning"
+                          sx={{ mt: 0.5 }}
+                        />
+                      )}
+                    </Box>
+                    <Box>
+                      <Tooltip title={freelancer.isArchived ? "Unarchive" : "Archive"}>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleArchiveClick(freelancer)}
+                          color={freelancer.isArchived ? "success" : "warning"}
+                        >
+                          {freelancer.isArchived ? <UnarchiveIcon /> : <ArchiveIcon />}
+                        </IconButton>
+                      </Tooltip>
                       <IconButton
                         size="small"
                         onClick={() => navigate(`/edit/${freelancer.userId}`)}
                         color="primary"
+                        disabled={freelancer.isArchived}
                       >
                         <EditIcon />
                       </IconButton>
@@ -191,6 +270,7 @@ const FreelancerList = () => {
                         size="small"
                         onClick={() => handleDeleteClick(freelancer)}
                         color="error"
+                        disabled={freelancer.isArchived}
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -287,6 +367,36 @@ const FreelancerList = () => {
           <Button onClick={handleDeleteCancel}>Cancel</Button>
           <Button onClick={handleDeleteConfirm} color="error" variant="contained">
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Archive Confirmation Dialog */}
+      <Dialog open={archiveDialogOpen} onClose={handleArchiveCancel}>
+        <DialogTitle>
+          {freelancerToArchive?.isArchived ? 'Unarchive' : 'Archive'} Freelancer
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to {freelancerToArchive?.isArchived ? 'unarchive' : 'archive'}{' '}
+            {freelancerToArchive?.name || freelancerToArchive?.userName}?
+            {!freelancerToArchive?.isArchived && (
+              <Box mt={1}>
+                <Alert severity="info">
+                  Archived freelancers will be hidden from the main list but can be restored later.
+                </Alert>
+              </Box>
+            )}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleArchiveCancel}>Cancel</Button>
+          <Button
+            onClick={handleArchiveConfirm}
+            color={freelancerToArchive?.isArchived ? "success" : "warning"}
+            variant="contained"
+          >
+            {freelancerToArchive?.isArchived ? 'Unarchive' : 'Archive'}
           </Button>
         </DialogActions>
       </Dialog>

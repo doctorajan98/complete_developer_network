@@ -21,6 +21,13 @@ namespace CDN.Infrastructure.Repositories
 
         public async Task<IEnumerable<Freelancer>> GetAllAsync()
         {
+            return await _context.Freelancers
+                .Where(f => !f.IsArchived)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Freelancer>> GetAllIncludingArchivedAsync()
+        {
             return await _context.Freelancers.ToListAsync();
         }
 
@@ -32,8 +39,10 @@ namespace CDN.Infrastructure.Repositories
             }
 
             return await _context.Freelancers
-                .Where(f => f.UserName.Contains(searchQuery) ||
-                           (f.Email != null && f.Email.Contains(searchQuery)))
+                .Where(f => !f.IsArchived &&
+                           (f.UserName.Contains(searchQuery) ||
+                            f.Name.Contains(searchQuery) ||
+                            (f.Email != null && f.Email.Contains(searchQuery))))
                 .ToListAsync();
         }
 
@@ -78,6 +87,48 @@ namespace CDN.Infrastructure.Repositories
             }
 
             return await _context.Freelancers.AnyAsync(f => f.Email == email);
+        }
+
+        public async Task<bool> ArchiveAsync(int userId)
+        {
+            var freelancer = await _context.Freelancers.FindAsync(userId);
+            if (freelancer == null)
+            {
+                return false;
+            }
+
+            freelancer.IsArchived = true;
+            freelancer.ArchivedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UnarchiveAsync(int userId)
+        {
+            var freelancer = await _context.Freelancers.FindAsync(userId);
+            if (freelancer == null)
+            {
+                return false;
+            }
+
+            freelancer.IsArchived = false;
+            freelancer.ArchivedAt = null;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ToggleArchiveStatusAsync(int userId)
+        {
+            var freelancer = await _context.Freelancers.FindAsync(userId);
+            if (freelancer == null)
+            {
+                return false;
+            }
+
+            freelancer.IsArchived = !freelancer.IsArchived;
+            freelancer.ArchivedAt = freelancer.IsArchived ? DateTime.UtcNow : null;
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

@@ -48,11 +48,20 @@ namespace CDN.Core.Application.DTO
         public string? PhoneNumber { get; set; }
         public List<string> SkillSet { get; set; } = new();
         public List<string> Hobbies { get; set; } = new();
+        public bool IsArchived { get; set; }
+        public DateTime? ArchivedAt { get; set; }
     }
 
     public class SearchFreelancerDto
     {
         [Required]
         public string SearchQuery { get; set; } = string.Empty;
+    }
+
+    public class ArchiveFreelancerDto
+    {
+        [Required]
+        public int UserId { get; set; }
+        public bool IsArchived { get; set; }
     }
 }
