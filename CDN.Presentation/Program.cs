@@ -20,6 +20,18 @@ builder.Services.AddScoped<IFreelancerRepository, FreelancerRepository>();
 // Service Registration
 builder.Services.AddScoped<IFreelancerService, FreelancerService>();
 
+// CORS Configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "https://localhost:3000", "http://localhost:3001", "https://localhost:3001") // React app URLs
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 // Swagger Configuration
 builder.Services.AddSwaggerGen(c =>
 {
@@ -43,6 +55,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Enable CORS
+app.UseCors("AllowReactApp");
+
 app.MapControllers();
 
 app.Run();
